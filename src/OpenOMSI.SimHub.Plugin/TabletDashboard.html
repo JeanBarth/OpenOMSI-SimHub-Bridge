@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#101820">
+<title>OpenOMSI Cockpit</title>
+<style>
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; background: #101820; color: #f4f1e8; font-family: Arial, Helvetica, sans-serif; }
+html { height: 100%; min-height: 100vh; }
+body { min-height: 100%; min-height: 100vh; padding: 14px; display: flex; flex-direction: column; }
+.top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; min-height: 42px; margin: 0 auto 12px; max-width: 1100px; gap: 10px; }
+.top-controls { display: flex; align-items: center; gap: 8px; }
+.telemetry-strip { flex: 0 0 auto; max-width: 1100px; width: 100%; margin: 0 auto 12px; min-height: 38px; padding: 3px 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #1b2933; border: 1px solid #2a3b47; border-radius: 9px; }
+.telemetry-strip .arrow { font-size: 22px; flex: 0 0 8%; width:auto; }
+.telemetry-strip .arrow:first-child { text-align: left; }
+.telemetry-strip .arrow:last-child { text-align: right; }
+.strip-speed { display: flex; align-items: baseline; justify-content: center; gap: 5px; flex: 0 0 20%; font-variant-numeric: tabular-nums; }
+.strip-speed strong { color: #8dff9b; font-size: 22px; line-height: 1; text-shadow: 0 0 8px rgba(101,225,132,.28); }
+.strip-speed span { color: #aab8c2; font-size: 12px; }
+.strip-fuel { flex:1 1 auto; min-width:0; display:flex; align-items:center; justify-content:flex-end; gap:10px; font-size:14px; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.strip-fuel .fuel-caption { color:#aab8c2; font-size:10px; text-transform:uppercase; letter-spacing:.08em; }
+.strip-fuel strong { font-size:16px; }
+.strip-fuel .bar { width:70px; height:7px; }
+.theme-button { border: 1px solid #536570; border-radius: 5px; background: #1b2933; color: #b9c5cc; padding: 8px 12px; font-size: 12px; font-weight: bold; }
+.theme-button.selected { background: #ffc857; border-color: #ffc857; color: #17212a; }
+.fullscreen-feedback { color: #ffc857; font-size: 12px; }
+.brand { color: #aab8c2; font-size: 14px; letter-spacing: .13em; text-transform: uppercase; }
+.status { color: #ffc857; font-size: 13px; }
+.status.online { color: #62d98b; }
+.layout { flex: 0 0 auto; max-width: 1100px; width: 100%; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 12px; }
+.cockpit-grid { flex: 1 1 auto; width: 100%; max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: .9fr 1.1fr; gap: 12px; align-items: start; }
+#dashboard, #controlPanel { width: auto; max-width: none; min-width: 0; margin: 0; }
+#dashboard { grid-column: 2; grid-row: 1; }
+#controlPanel { grid-column: 1; grid-row: 1; display: flex; flex-direction: column; }
+.card { background: #1b2933; border: 1px solid #2a3b47; border-radius: 14px; padding: 18px; }
+.main { flex: 1 1 440px; min-height: 250px; display: flex; flex-direction: column; justify-content: space-between; }
+.side { flex: 1 1 auto; width: 100%; display: flex; flex-direction: column; gap: 10px; }
+.label { color: #8da0ad; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
+.speed { text-align: center; font-size: 120px; font-size: clamp(96px, 22vw, 180px); line-height: .95; font-weight: 700; font-variant-numeric: tabular-nums; }
+.unit { text-align: center; color: #aab8c2; font-size: 18px; margin-top: 6px; }
+.indicators { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+.arrow { color: #40515b; font-size: 36px; font-weight: bold; }
+.arrow.on { color: #65e184; text-shadow: 0 0 14px rgba(101,225,132,.5); }
+.gear { font-size: 30px; color: #ffc857; font-weight: bold; }
+.fuel-value { display: flex; justify-content: space-between; align-items: baseline; margin: 8px 0; font-size: 24px; font-variant-numeric: tabular-nums; }
+.bar { height: 12px; background: #34434d; border-radius: 8px; overflow: hidden; }
+.fill { height: 100%; width: 0; background: #65d994; transition: width .3s ease; }
+.tiles { display: flex; flex-wrap: wrap; gap: 8px; }
+.tile { flex: 1 1 90px; background: #23333e; border-radius: 10px; padding: 12px; min-height: 68px; }
+.tile .value { display: block; margin-top: 6px; font-size: 19px; font-weight: bold; }
+.door { color: #71828d; }
+.door.open { color: #62d98b; }
+.route { font-size: 17px; line-height: 1.35; }
+.route strong { display: block; color: #ffc857; font-size: 23px; margin: 3px 0 8px; }
+.hint { color: #71828d; text-align: center; font-size: 12px; padding: 12px 0 2px; }
+.hidden { display: none !important; }
+.terminal { flex: 0 0 auto; width: 100%; max-width: none; }
+.terminal-screen { background: #101820; color: #65e184; border: 1px solid #536570; padding: 12px; margin: 12px 0; min-height: 58px; font-family: "Courier New", monospace; }
+.terminal-screen strong { display: block; font-size: 22px; margin-top: 5px; }
+.terminal-actions, .ticket-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+.terminal-button, .pad-button { border: 1px solid #536570; border-radius: 7px; background: #23333e; color: #f4f1e8; padding: 14px; min-height: 48px; font-weight: bold; font-size: 16px; }
+.terminal-button, .pad-button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; transition: background-color .08s ease, transform .08s ease, box-shadow .08s ease; }
+.terminal-button:active, .pad-button:active, .terminal-button.pressed, .pad-button.pressed { background:#59666f; color:#fff; transform:translateY(2px); box-shadow:inset 0 2px 4px rgba(0,0,0,.3); }
+.terminal-button { flex: 1 1 110px; }
+.pad { display: grid; grid-template-columns: repeat(3, minmax(60px, 1fr)); gap: 8px; max-width: 360px; margin: 12px auto; }
+.pad-button { font-size: 20px; }
+.terminal-message { min-height: 22px; color: #ffc857; text-align: center; }
+.ticket-panel { flex: 0 0 auto; width:100%; }
+.ticket-actions { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); }
+.ticket-actions .terminal-button { min-width: 0; padding: 8px 4px; }
+@media (orientation: portrait) { body { padding: 10px; } .cockpit-grid { display: flex; flex-direction: column; } #controlPanel, #dashboard { width: 100%; } .side { flex-direction: row; flex-wrap: wrap; } .side > .card { flex: 1 1 220px; } }
+@media (orientation: landscape) and (max-height: 620px) { body { padding: 8px; } .top { min-height: 34px; margin-bottom: 7px; } .telemetry-strip { min-height: 34px; margin-bottom: 8px; padding: 2px 12px; } .telemetry-strip .arrow { font-size: 21px; } .strip-speed strong { font-size: 22px; } .cockpit-grid, .layout { gap: 8px; } .card { padding: 11px; border-radius: 9px; } .side { gap: 8px; } .tile { min-height: 52px; padding: 8px; } .tile .value { margin-top: 3px; font-size: 16px; } .fuel-value { font-size: 20px; margin: 5px 0; } .bar { height: 9px; } .route { font-size: 14px; } .route strong { font-size: 19px; margin: 2px 0 5px; } .hint { padding: 5px 0 1px; } .terminal-screen { min-height: 45px; padding: 7px; margin: 7px 0; } .terminal-screen strong { font-size: 18px; margin-top: 2px; } .terminal-actions, .ticket-actions { gap: 5px; margin: 6px 0; } .terminal-button, .pad-button { padding: 8px; min-height: 38px; font-size: 14px; } .pad { gap: 5px; margin: 7px auto; } .pad-button { font-size: 18px; } .terminal-message { min-height: 15px; font-size: 11px; } }
+.theme-ibis { background: #171810; color: #e5d5a2; font-family: "Courier New", monospace; }
+html.theme-ibis { background: #171810; }
+.theme-ibis .card { background: #202116; border: 1px solid #65603d; border-radius: 3px; }
+.theme-ibis .brand, .theme-ibis .label, .theme-ibis .unit, .theme-ibis .hint { color: #aaa077; }
+.theme-ibis .speed, .theme-ibis .gear, .theme-ibis .route strong { color: #ffd16b; }
+.theme-ibis .arrow.on, .theme-ibis .door.open, .theme-ibis .status.online { color: #a9df79; text-shadow: none; }
+.theme-ibis .door { color: #ffd16b; }
+.theme-ibis .door.open { color: #a9df79; }
+.theme-ibis .tile { background: #28291b; border-radius: 2px; }
+.theme-ibis .bar { background: #393925; border-radius: 0; }
+.theme-ibis .fill { background: #a9df79; }
+.theme-ibis .theme-button { background: #202116; color: #e5d5a2; border-color: #65603d; border-radius: 2px; font-family: "Courier New", monospace; }
+.theme-ibis .theme-button.selected { background: #ffd16b; color: #171810; }
+.theme-ibis .fullscreen-feedback { color: #ffd16b; }
+.theme-ibis .telemetry-strip { background:#202116; border-color:#65603d; border-radius:2px; }
+.theme-ibis .strip-speed span, .theme-ibis .strip-fuel .fuel-caption { color:#aaa077; }
+.theme-ibis .strip-fuel { color:#ffd16b; }
+.theme-ibis .strip-speed strong { color:#baff79; text-shadow:none; }
+.theme-ibis .terminal-screen { background: #171810; color: #ffd16b; border-color: #65603d; }
+.theme-ibis .terminal-button, .theme-ibis .pad-button { background: #28291b; color: #e5d5a2; border-color: #65603d; border-radius: 2px; }
+.theme-ibis .terminal-button:active, .theme-ibis .pad-button:active, .theme-ibis .terminal-button.pressed, .theme-ibis .pad-button.pressed { background:#686345; color:#fff4c7; }
+.theme-atron { background: #b9c2c3; color: #17242b; }
+html.theme-atron { background: #b9c2c3; }
+.theme-atron .top { background: #1e333d; border-radius: 9px; padding: 7px 12px; }
+.theme-atron .brand { color: #e8f0ee; }
+.theme-atron .status.online { color: #8de2a5; }
+.theme-atron .status { color: #ffd16b; }
+.theme-atron .card { background: #e8edeb; border: 1px solid #9ba9a7; border-radius: 9px; box-shadow: 0 2px 5px rgba(22,43,50,.13); color: #17242b; }
+.theme-atron .label, .theme-atron .unit, .theme-atron .hint, .theme-atron .brand { color: #60747a; }
+.theme-atron .top .brand { color: #e8f0ee; }
+.theme-atron .speed { color: #172e38; }
+.theme-atron .gear, .theme-atron .route strong { color: #176b52; }
+.theme-atron .arrow.on { color: #128454; text-shadow: none; }
+.theme-atron .door.open { color: #c83232; text-shadow: none; }
+.theme-atron .tile { background: #d7e0dd; border-radius: 6px; }
+.theme-atron .bar { background: #bdcbc6; }
+.theme-atron .fill { background: #168256; }
+.theme-atron .theme-button { background: #e8edeb; color: #31434a; border-color: #71868a; }
+.theme-atron .theme-button.selected { background: #55bd88; border-color: #32865e; color: #10271e; }
+.theme-atron .fullscreen-feedback { color: #176b52; }
+.theme-atron .telemetry-strip { background:#1e333d; border-color:#71868a; }
+.theme-atron .strip-speed span, .theme-atron .strip-fuel .fuel-caption { color:#d2dfdc; }
+.theme-atron .strip-fuel { color:#e8f0ee; }
+.theme-atron .strip-speed strong { color:#8dff9b; text-shadow:none; }
+.theme-atron .terminal-screen { background: #1e333d; color: #8de2a5; }
+.theme-atron .terminal-button, .theme-atron .pad-button { background: #d7e0dd; color: #17242b; border-color: #71868a; }
+.theme-atron .terminal-button:active, .theme-atron .pad-button:active, .theme-atron .terminal-button.pressed, .theme-atron .pad-button.pressed { background:#899895; color:#fff; }
+</style>
+</head>
+<body>
+<header class="top"><div class="brand">OpenOMSI · Bordrechner</div><div class="top-controls"><div id="status" class="status">Verbinde …</div><button id="ibisButton" class="theme-button" type="button" onclick="setTheme('ibis')">IBIS</button><button id="atronButton" class="theme-button" type="button" onclick="setTheme('atron')">ATRON</button><button id="fullscreenButton" class="theme-button" type="button" onclick="toggleFullscreen()">Vollbild</button><span id="fullscreenFeedback" class="fullscreen-feedback" aria-live="polite"></span></div></header>
+<div class="telemetry-strip"><span id="left" class="arrow">◀</span><div class="strip-speed"><strong id="speed">—</strong><span>km/h</span></div><span id="right" class="arrow">▶</span><div class="strip-fuel"><span class="fuel-caption">Tank</span><strong id="fuel">— L</strong><span id="percent">— %</span><div class="bar"><div id="fuelbar" class="fill"></div></div></div></div>
+<div class="cockpit-grid">
+<main id="dashboard" class="layout">
+  <div class="side">
+    <section class="card route">
+      <div class="label">Ziel · Linie</div><strong id="destination">—</strong>
+      <span id="line">Linie —</span><br><span id="nextStop">Nächster Halt: —</span>
+    </section>
+    <section class="card">
+      <div class="label">Türen</div>
+      <div class="tiles" style="margin-top:10px">
+        <div id="doorFront" class="tile door"><span class="label">Vorne</span><span class="value">ZU</span></div>
+        <div id="doorMiddle" class="tile door"><span class="label">Mitte</span><span class="value">ZU</span></div>
+        <div id="doorRear" class="tile door"><span class="label">Hinten</span><span class="value">ZU</span></div>
+      </div>
+    </section>
+    <section id="ticketsCard" class="card ticket-panel hidden">
+      <div class="label">Fahrkartenverkauf</div>
+      <div class="ticket-actions" id="ticketActions"></div>
+      <button class="terminal-button" type="button" onclick="sendCommand('sell')">Ticket ausgeben</button>
+    </section>
+  </div>
+</main>
+<main id="controlPanel" class="layout">
+  <section class="card terminal">
+    <div class="label">Fahrzeug-Terminal</div>
+    <div id="controlProfile" class="hint">Warte auf unterstütztes Fahrzeug …</div>
+    <div class="terminal-screen"><span id="terminalMode">Bereit</span><strong id="terminalValue">—</strong></div>
+    <div class="pad">
+      <button class="pad-button" onclick="sendDigit(1)">1</button><button class="pad-button" onclick="sendDigit(2)">2</button><button class="pad-button" onclick="sendDigit(3)">3</button>
+      <button class="pad-button" onclick="sendDigit(4)">4</button><button class="pad-button" onclick="sendDigit(5)">5</button><button class="pad-button" onclick="sendDigit(6)">6</button>
+      <button class="pad-button" onclick="sendDigit(7)">7</button><button class="pad-button" onclick="sendDigit(8)">8</button><button class="pad-button" onclick="sendDigit(9)">9</button>
+      <button class="pad-button" onclick="sendCommand('cancel')">C</button><button class="pad-button" onclick="sendDigit(0)">0</button><button class="pad-button" onclick="sendCommand('confirm')">OK</button>
+    </div>
+    <div id="routeControls">
+      <div class="terminal-actions">
+        <button class="terminal-button" type="button" onclick="selectMode('line')">Linie</button>
+        <button class="terminal-button" type="button" onclick="selectMode('umlauf')">Umlauf / Route</button>
+      </div>
+    </div>
+    <div id="commandMessage" class="terminal-message" aria-live="polite"></div>
+  </section>
+</main>
+</div>
+<script>
+(function () {
+  function byId(id) { return document.getElementById(id); }
+  function setText(id, value) { byId(id).textContent = value; }
+  function findControlButton(node) {
+    while (node && node !== document) {
+      if (node.tagName === "BUTTON" && (node.className.indexOf("pad-button") >= 0 || node.className.indexOf("terminal-button") >= 0)) return node;
+      node = node.parentNode;
+    }
+    return null;
+  }
+  function setPressed(event, pressed) {
+    var button = findControlButton(event.target || event.srcElement);
+    if (!button) return;
+    if (pressed && button.className.indexOf("pressed") < 0) button.className += " pressed";
+    if (!pressed) button.className = button.className.replace(/\s*pressed\b/g, "");
+  }
+  document.addEventListener("touchstart", function (event) { setPressed(event, true); }, false);
+  document.addEventListener("touchend", function (event) { setPressed(event, false); }, false);
+  document.addEventListener("touchcancel", function (event) { setPressed(event, false); }, false);
+  document.addEventListener("mousedown", function (event) { setPressed(event, true); }, false);
+  document.addEventListener("mouseup", function (event) { setPressed(event, false); }, false);
+  function setDoor(id, open) {
+    var el = byId(id);
+    el.className = open ? "tile door open" : "tile door";
+    el.getElementsByTagName("span")[1].textContent = open ? "OFFEN" : "ZU";
+  }
+  function update(snapshot) {
+    var d = snapshot && snapshot.data ? snapshot.data : {};
+    var connected = snapshot && snapshot.connected;
+    var status = byId("status");
+    status.textContent = connected ? (d.paused ? "Spiel pausiert" : "Verbunden") : "Warte auf OpenOMSI …";
+    status.className = connected ? "status online" : "status";
+    setText("speed", connected ? Math.round(Math.abs(Number(d.speedKmh) || 0)) : "—");
+    byId("left").className = d.turnLeft ? "arrow on" : "arrow";
+    byId("right").className = d.turnRight ? "arrow on" : "arrow";
+    var liters = Number(d.fuelLiters) || 0;
+    var percent = Math.max(0, Math.min(100, Number(d.fuelPercent) || 0));
+    setText("fuel", connected ? liters.toFixed(0) + " L" : "— L");
+    setText("percent", connected ? Math.round(percent) + " %" : "— %");
+    byId("fuelbar").style.width = connected ? percent + "%" : "0%";
+    setDoor("doorFront", connected && d.frontDoorOpen);
+    setDoor("doorMiddle", connected && d.middleDoorOpen);
+    setDoor("doorRear", connected && d.rearDoorOpen);
+    setText("destination", connected ? (d.destination || "Kein Ziel") : "—");
+    setText("line", "Linie " + (connected && d.line ? d.line : "—"));
+    setText("nextStop", "Nächster Halt: " + (connected && d.nextStop ? d.nextStop : "—"));
+    var profile = connected ? (d.controlProfile || "none") : "none";
+    var labels = {almex:"Almex erkannt", atron:"ATRON-Terminal erkannt", afr4:"AFR4-Terminal erkannt", ibox:"IBox erkannt", "ibox-ibis":"IBox und IBIS erkannt", ibis:"IBIS erkannt", ticketprinter:"Standard-Ticketdrucker erkannt", "ibis-ticketprinter":"IBIS und Standard-Ticketdrucker erkannt", none:"Für diesen Bus noch kein Bedienprofil"};
+    setText("controlProfile", labels[profile] || "Busprofil: " + profile);
+    byId("ticketsCard").className = profile === "almex" || profile === "atron" || profile === "afr4" || profile === "ibox" || profile === "ibox-ibis" || profile === "ticketprinter" || profile === "ibis-ticketprinter" ? "card terminal" : "card terminal hidden";
+    byId("routeControls").className = profile === "ticketprinter" ? "hidden" : "";
+    rebuildTicketButtons(profile);
+    Array.prototype.forEach.call(document.querySelectorAll("#controlPanel button, #ticketsCard button"), function (button) { button.disabled = !connected || profile === "none"; });
+  }
+  var terminalMode = "";
+  var terminalValue = "";
+  window.selectMode = function (mode) {
+    terminalMode = mode;
+    terminalValue = "";
+    setText("terminalMode", mode === "line" ? "Linie eingeben" : "Umlauf / Route eingeben");
+    setText("terminalValue", "—");
+    sendCommand(mode);
+  };
+  window.sendDigit = function (digit) {
+    if (!terminalMode && byId("controlProfile").textContent.indexOf("ATRON") >= 0) terminalMode = "atron";
+    if (!terminalMode) { setText("commandMessage", "Zuerst Linie oder Umlauf auswählen."); return; }
+    sendCommand("digit", digit, function (ok) { if (ok) { terminalValue += String(digit); setText("terminalValue", terminalValue); } });
+  };
+  window.sendCommand = function (action, value, callback) {
+    var request = new XMLHttpRequest();
+    request.open("POST", "/api/command", true);
+    request.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+    request.onreadystatechange = function () {
+      if (request.readyState !== 4) return;
+      var result = {};
+      try { result = JSON.parse(request.responseText); } catch (e) { }
+      setText("commandMessage", result.message || (request.status === 200 ? "Gesendet" : "Befehl fehlgeschlagen"));
+      if (typeof callback === "function") callback(request.status === 200 && result.ok);
+    if ((action === "confirm" || action === "cancel") && terminalMode !== "atron") { terminalMode = ""; terminalValue = ""; setText("terminalMode", "Bereit"); setText("terminalValue", "—"); }
+    };
+    request.send(JSON.stringify({action: action, value: value == null ? "" : String(value)}));
+  };
+  window.selectTicket = function (number) { sendCommand("ticket", number); };
+  var renderedTicketProfile = "";
+  function rebuildTicketButtons(profile) {
+    if (profile === renderedTicketProfile) return;
+    renderedTicketProfile = profile;
+    var container = byId("ticketActions");
+    while (container.firstChild) container.removeChild(container.firstChild);
+    var count = profile === "almex" ? 8 : profile === "atron" ? 10 : profile === "ibox" || profile === "ibox-ibis" ? 7 : 5;
+    if (profile !== "almex" && profile !== "atron" && profile !== "afr4" && profile !== "ibox" && profile !== "ibox-ibis" && profile !== "ticketprinter" && profile !== "ibis-ticketprinter") count = 0;
+    for (var i = 1; i <= count; i++) {
+      var button = document.createElement("button");
+      button.className = "terminal-button";
+      button.type = "button";
+      button.textContent = "Ticket " + i;
+      button.onclick = (function (n) { return function () { window.selectTicket(n); }; }(i));
+      container.appendChild(button);
+    }
+  }
+  function poll() {
+    var request = new XMLHttpRequest();
+    request.open("GET", "/api/state", true);
+    request.onreadystatechange = function () {
+      if (request.readyState === 4) {
+        if (request.status === 200) {
+          try { update(JSON.parse(request.responseText)); } catch (e) { }
+        } else {
+          byId("status").textContent = "Verbindung zum PC verloren";
+          byId("status").className = "status";
+        }
+      }
+    };
+    request.send(null);
+  }
+  window.setTheme = function (theme) {
+    document.body.className = "theme-" + theme;
+    document.documentElement.className = "theme-" + theme;
+    byId("ibisButton").className = theme === "ibis" ? "theme-button selected" : "theme-button";
+    byId("atronButton").className = theme === "atron" ? "theme-button selected" : "theme-button";
+    try { window.localStorage.setItem("openomsi-tablet-theme", theme); } catch (e) { }
+  };
+  function isFullscreen() {
+    return !!(document.fullscreenElement || document.webkitFullscreenElement || document.webkitCurrentFullScreenElement);
+  }
+  function updateFullscreenButton() {
+    setText("fullscreenButton", isFullscreen() ? "Vollbild beenden" : "Vollbild");
+  }
+  function fullscreenMessage(message) {
+    setText("fullscreenFeedback", message);
+    window.setTimeout(function () { setText("fullscreenFeedback", ""); }, 3500);
+  }
+  window.toggleFullscreen = function () {
+    var result;
+    try {
+      if (isFullscreen()) {
+        var exit = document.exitFullscreen || document.webkitExitFullscreen || document.webkitCancelFullScreen;
+        if (!exit) { fullscreenMessage("Zum Beenden Browser-Zurück verwenden"); return; }
+        result = exit.call(document);
+      } else {
+        var root = document.documentElement;
+        var request = root.requestFullscreen || root.webkitRequestFullscreen || root.webkitRequestFullScreen;
+        if (!request) { fullscreenMessage("Vollbild wird von diesem Browser nicht unterstützt"); return; }
+        result = request.call(root);
+      }
+    } catch (e) {
+      fullscreenMessage("Vollbild konnte nicht gestartet werden");
+      return;
+    }
+    if (result && typeof result.catch === "function") {
+      result.catch(function () { fullscreenMessage("Vollbild konnte nicht gestartet werden"); });
+    }
+  };
+  document.addEventListener("fullscreenchange", updateFullscreenButton, false);
+  document.addEventListener("webkitfullscreenchange", updateFullscreenButton, false);
+  try { window.setTheme(window.localStorage.getItem("openomsi-tablet-theme") || "ibis"); }
+  catch (e) { window.setTheme("ibis"); }
+  updateFullscreenButton();
+  poll();
+  window.setInterval(poll, 300);
+}());
+</script>
+</body>
+</html>

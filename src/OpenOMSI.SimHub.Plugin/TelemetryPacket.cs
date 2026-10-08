@@ -1,0 +1,74 @@
+namespace OpenOMSI.SimHub
+{
+    internal sealed class TelemetryPacket
+    {
+        public string Protocol { get; set; }
+        public int ProtocolVersion { get; set; }
+        public long Sequence { get; set; }
+        public double GameTimeSeconds { get; set; }
+        public bool Connected { get; set; }
+        public bool Paused { get; set; }
+        public string Vehicle { get; set; }
+        public string Manufacturer { get; set; }
+        public string Model { get; set; }
+        public string ControlProfile { get; set; }
+        public string Map { get; set; }
+        public double SpeedKmh { get; set; }
+        public double Throttle { get; set; }
+        public double Brake { get; set; }
+        public double SteeringRad { get; set; }
+        public double SteeringNormalized { get; set; }
+        public double EngineRpm { get; set; }
+        public bool EngineRunning { get; set; }
+        public double EngineTemperatureC { get; set; }
+        public double FuelLiters { get; set; }
+        public double FuelPercent { get; set; }
+        public double Gear { get; set; }
+        public double GearSelection { get; set; }
+        public string TransmissionType { get; set; }
+        public string GearSelector { get; set; }
+        public double Retarder { get; set; }
+        public bool ParkingBrake { get; set; }
+        public bool AbsActive { get; set; }
+        public double AirPressure1Bar { get; set; }
+        public double AirPressure2Bar { get; set; }
+        public double Door0 { get; set; }
+        public double Door1 { get; set; }
+        public double Door2 { get; set; }
+        public double Door3 { get; set; }
+        public double Door4 { get; set; }
+        public double Door5 { get; set; }
+        public bool FrontDoorOpen { get; set; }
+        public bool MiddleDoorOpen { get; set; }
+        public bool RearDoorOpen { get; set; }
+        public bool DoorRelease { get; set; }
+        public bool StopRequested { get; set; }
+        public bool TurnLeft { get; set; }
+        public bool TurnRight { get; set; }
+        public bool Hazards { get; set; }
+        public bool BrakeLight { get; set; }
+        public bool PositionLights { get; set; }
+        public bool LowBeam { get; set; }
+        public bool HighBeam { get; set; }
+        public bool ReverseLight { get; set; }
+        public bool Wipers { get; set; }
+        public double WiperPosition { get; set; }
+        public string Line { get; set; }
+        public string Tour { get; set; }
+        public double Trip { get; set; }
+        public double Trips { get; set; }
+        public string TripName { get; set; }
+        public string Destination { get; set; }
+        public string NextStop { get; set; }
+        public double NextStopNumber { get; set; }
+        public double NextStopArrival { get; set; }
+        public double NextStopDeparture { get; set; }
+        public double DelaySeconds { get; set; }
+        public double Passengers { get; set; }
+        public double PositionX { get; set; }
+        public double PositionY { get; set; }
+        public double PositionZ { get; set; }
+        public double HeadingDeg { get; set; }
+        public double ArticulationRad { get; set; }
+    }
+}
