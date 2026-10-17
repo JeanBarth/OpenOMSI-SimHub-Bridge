@@ -104,10 +104,17 @@ local function bool_var(name)
   return var(name, 0) > 0.5
 end
 
+local function bus_api(name)
+  local ok, value = pcall(function() return omsi.bus[name]() end)
+  if ok then return value end
+  return nil
+end
+
 local function control_profile()
   if omsi.var("almex_menu") ~= nil or omsi.str("almex_input") ~= nil then return "almex" end
   if omsi.var("AFR4_BT_0") ~= nil or omsi.var("AFR4_Display_Panel") ~= nil then return "afr4" end
   if omsi.var("atron_t_0") ~= nil or omsi.var("atron_t_OK") ~= nil then return "atron" end
+  if omsi.var("copilot_mode") ~= nil or omsi.str("copilot_display") ~= nil then return "mvg-copilot" end
   local has_ibox = omsi.var("ibox_taste_D1") ~= nil or omsi.var("ibox_modus") ~= nil
   local has_ibis = omsi.var("IBIS_mode") ~= nil or omsi.var("IBIS_Route") ~= nil or omsi.var("IBIS_LinieKurs") ~= nil
   local has_ticketprinter = omsi.str("ticketprinter_display") ~= nil
@@ -275,6 +282,14 @@ local function add_string(fields, name, value)
   fields[#fields + 1] = json_string(name) .. ":" .. json_string(value)
 end
 
+local function road_speed_limit()
+  -- openOMSI 0.2.22+ exposes the current lane limit through this API.
+  -- Keep the call protected so the bridge still runs on older 0.2.x builds.
+  local ok, value = pcall(function() return omsi.map.speed_limit() end)
+  if ok and value ~= nil then return value end
+  return nil
+end
+
 local function build_packet()
   sequence = sequence + 1
   local fields = {}
@@ -290,19 +305,46 @@ local function build_packet()
   end
 
   local info = omsi.info() or {}
+  local bus_doors = bus_api("doors")
+  local headlights_level = finite_number(bus_api("headlights"), -1)
+  local api_handbrake = bus_api("handbrake")
+  local api_stop_brake = bus_api("stop_brake")
+  local api_indicator = bus_api("indicator")
   local x, y, z, heading = omsi.position()
   local steering_rad = var("Axle_Steering_0_L")
   -- OMSI bus scripts commonly expose door positions as door_0, etc.;
   -- retain the legacy names as fallbacks for buses that use them.
-  local door0 = var_any({"door_0", "door0"})
-  local door1 = var_any({"door_1", "door1"})
-  local door2 = var_any({"door_2", "door2"})
-  local door3 = var_any({"door_3", "door3"})
-  local door4 = var_any({"door_4", "door4"})
-  local door5 = var_any({"door_5", "door5"})
-  local door6 = var_any({"door_6", "door6"})
-  local door7 = var_any({"door_7", "door7"})
+  local function door_position(index)
+    if type(bus_doors) == "table" and bus_doors[index + 1] ~= nil then
+      return finite_number(bus_doors[index + 1], 0)
+    end
+    return var_any({"door_" .. index, "door" .. index})
+  end
+  local door0, door1, door2, door3 = door_position(0), door_position(1), door_position(2), door_position(3)
+  local door4, door5, door6, door7 = door_position(4), door_position(5), door_position(6), door_position(7)
   local turn_left, turn_right, hazards = turn_states()
+  if api_indicator ~= nil then
+    turn_left = api_indicator == "left"
+    turn_right = api_indicator == "right"
+    hazards = api_indicator == "hazard"
+  end
+  -- Merge openOMSI's normalized light level with common OMSI script variable names.
+  -- Some buses expose their own variables while the normalized API still reports off.
+  local raw_low_beam = var_any({
+    "lights_abbl", "lights_main", "elec_lights_lowbeam", "elec_lights_abbl",
+    "lowbeam", "low_beam", "abblendlicht"
+  }) > 0.5
+  local raw_high_beam = var_any({
+    "lights_fern", "elec_lights_highbeam", "elec_lights_fern",
+    "highbeam", "high_beam", "fernlicht"
+  }) > 0.5
+  if omsi.var("Spot_Select") ~= nil and var("Spot_Select") >= 0 then raw_low_beam = true end
+  local headlights_on = raw_low_beam or raw_high_beam or headlights_level >= 2
+  local high_beam_on = raw_high_beam or headlights_level >= 3
+  local parking_brake_on = bool_var("bremse_feststell_sw")
+  if type(api_handbrake) == "boolean" then parking_brake_on = api_handbrake end
+  local stop_brake_on = var_any({"haltebremse", "Haltestellenbremse", "stop_brake", "StopBrake"}) > 0.5
+  if type(api_stop_brake) == "boolean" then stop_brake_on = api_stop_brake end
   local gear = var("antrieb_getr_aktugang")
   local gear_selection = var("antrieb_getr_gangwahl", 1)
 
@@ -315,6 +357,7 @@ local function build_packet()
   add_string(fields, "map", info.map)
 
   add_number(fields, "speedKmh", info.speed or omsi.speed())
+  add_number(fields, "speedLimitKmh", road_speed_limit())
   add_number(fields, "throttle", var("Throttle"))
   add_number(fields, "brake", var("Brake"))
   add_number(fields, "steeringRad", steering_rad)
@@ -331,7 +374,8 @@ local function build_packet()
   add_string(fields, "transmissionType", transmission_type)
   add_string(fields, "gearSelector", selector_position(gear, gear_selection))
   add_number(fields, "retarder", clamp(var("retarder_brake_vol"), 0, 1))
-  add_boolean(fields, "parkingBrake", bool_var("bremse_feststell_sw"))
+  add_boolean(fields, "parkingBrake", parking_brake_on)
+  add_boolean(fields, "stopBrake", stop_brake_on)
   add_boolean(fields, "absActive", bool_var("bremse_ABS_eingriff"))
 
   add_number(fields, "airPressure1Bar", var("bremse_p_Tank01") / 100000)
@@ -354,8 +398,10 @@ local function build_packet()
   add_boolean(fields, "hazards", hazards)
   add_boolean(fields, "brakeLight", bool_var("elec_lights_brems"))
   add_boolean(fields, "positionLights", bool_var("elec_lights_stand"))
-  add_boolean(fields, "lowBeam", bool_var("elec_lights_lowbeam"))
-  add_boolean(fields, "highBeam", bool_var("elec_lights_highbeam"))
+  add_boolean(fields, "headlightsOn", headlights_on)
+  add_number(fields, "headlightsLevel", headlights_level >= 0 and headlights_level or nil)
+  add_boolean(fields, "lowBeam", headlights_on)
+  add_boolean(fields, "highBeam", high_beam_on)
   add_boolean(fields, "reverseLight", bool_var("elec_lights_rueckfahr"))
   add_boolean(fields, "wipers", bool_var("elec_wiper_isrunning"))
   add_number(fields, "wiperPosition", var("elec_wiperpos"))
@@ -396,6 +442,33 @@ local function trigger_if_present(name)
   if name and omsi.has_vehicle() then
     omsi.log("tablet control trigger: " .. name)
     omsi.trigger(name)
+  end
+end
+
+local function press_if_present(name)
+  if name and omsi.has_vehicle() then
+    omsi.log("tablet control press: " .. name)
+    omsi.press(name)
+    omsi.after(0.12, function()
+      if omsi.has_vehicle() then omsi.release(name) end
+    end)
+  end
+end
+
+local function start_mvg_copilot_route_entry(menu_item)
+  local mode = tonumber(omsi.var("copilot_mode")) or 0
+  if mode == 13 then return end
+  if mode == 24 then
+    trigger_if_present("copilot_clickspot_bottom_02")
+    omsi.after(0.2, function()
+      if omsi.has_vehicle() and control_profile() == "mvg-copilot" then
+        trigger_if_present("CoPilot_Mainmenu_clickspot_" .. tostring(menu_item))
+      end
+    end)
+  elseif mode == 4 then
+    trigger_if_present("CoPilot_Mainmenu_clickspot_" .. tostring(menu_item))
+  else
+    omsi.log("MVG CoPilot route input unavailable in mode " .. tostring(mode))
   end
 end
 
@@ -442,19 +515,21 @@ local function run_tablet_command(frame)
 
   if code == "0" then
     if profile == "almex" then trigger_if_present("almex_click_linie")
+    elseif profile == "mvg-copilot" then start_mvg_copilot_route_entry(2)
     elseif has_afr4 then trigger_if_present("AFR4_BT_L_K")
     elseif has_ibox then trigger_if_present("ibox_taste_C3")
     elseif has_ibis then trigger_if_present("IBIS_setmode_linie_kurs")
     elseif has_atron then start_atron_route_entry() end
   elseif code == "1" then
     if profile == "almex" then trigger_if_present("almex_click_umlauf")
+    elseif profile == "mvg-copilot" then start_mvg_copilot_route_entry(3)
     elseif has_afr4 then trigger_if_present("AFR4_BT_Fahrtauswahl")
     elseif has_ibox then trigger_if_present("ibox_taste_D12")
     elseif has_ibis then trigger_if_present("IBIS_setmode_route")
     elseif has_atron then start_atron_route_entry() end
   elseif code == "2" then
     if profile == "almex" then
-      trigger_if_present("almex_clickNB")
+      press_if_present("almex_clickNB")
     elseif has_afr4 then
       trigger_if_present("AFR4_BT_Bestaetigen")
     elseif has_ibox then
@@ -463,6 +538,8 @@ local function run_tablet_command(frame)
       trigger_if_present("IBIS_eingabe")
     elseif has_atron then
       trigger_if_present("atron_t_R5")
+    elseif profile == "mvg-copilot" then
+      trigger_if_present("copilot_clickspot_bottom_04")
     elseif has_ticketprinter then
       trigger_if_present("ticketprinter_button_enter")
     end
@@ -477,6 +554,8 @@ local function run_tablet_command(frame)
       trigger_if_present("IBIS_loeschen")
     elseif has_atron then
       trigger_if_present("atron_t_C")
+    elseif profile == "mvg-copilot" then
+      trigger_if_present("copilot_clickspot_bottom_03")
     elseif has_ticketprinter then
       trigger_if_present("ticketprinter_button_cancel")
     end
@@ -492,6 +571,9 @@ local function run_tablet_command(frame)
       trigger_if_present("IBIS_" .. value)
     elseif has_atron then
       trigger_if_present("atron_t_" .. value)
+    elseif profile == "mvg-copilot" then
+      local digit_index = value == "0" and "9" or tostring(tonumber(value) - 1)
+      trigger_if_present("copilot_clickspot_numbers_" .. digit_index)
     end
   elseif code == "5" then
     local index = tonumber(value)
@@ -510,6 +592,8 @@ local function run_tablet_command(frame)
   elseif code == "6" then
     if profile == "almex" then
       trigger_if_present("almex_ticket_toggle")
+    elseif profile == "mvg-copilot" then
+      trigger_if_present("ticketprinter_getticket")
     elseif has_afr4 then
       trigger_if_present("AFR4_BT_OK_klein")
     elseif has_ibox then

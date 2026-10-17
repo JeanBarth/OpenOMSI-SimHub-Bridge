@@ -12,13 +12,17 @@ html { height: 100%; min-height: 100vh; }
 body { min-height: 100%; min-height: 100vh; padding: 14px; display: flex; flex-direction: column; }
 .top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; min-height: 42px; margin: 0 auto 12px; max-width: 1100px; gap: 10px; }
 .top-controls { display: flex; align-items: center; gap: 8px; }
-.telemetry-strip { flex: 0 0 auto; max-width: 1100px; width: 100%; margin: 0 auto 12px; min-height: 38px; padding: 3px 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #1b2933; border: 1px solid #2a3b47; border-radius: 9px; }
+.telemetry-strip { position:relative; flex: 0 0 auto; max-width: 1100px; width: 100%; margin: 0 auto 12px; min-height: 38px; padding: 3px 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #1b2933; border: 1px solid #2a3b47; border-radius: 9px; }
 .telemetry-strip .arrow { font-size: 22px; flex: 0 0 8%; width:auto; }
 .telemetry-strip .arrow:first-child { text-align: left; }
-.telemetry-strip .arrow:last-child { text-align: right; }
+.telemetry-strip #right { text-align: right; }
 .strip-speed { display: flex; align-items: baseline; justify-content: center; gap: 5px; flex: 0 0 20%; font-variant-numeric: tabular-nums; }
 .strip-speed strong { color: #8dff9b; font-size: 22px; line-height: 1; text-shadow: 0 0 8px rgba(101,225,132,.28); }
 .strip-speed span { color: #aab8c2; font-size: 12px; }
+.stop-request { flex:0 0 auto; display:flex; align-items:center; justify-content:center; gap:5px; color:#82929b; white-space:nowrap; font-size:10px; font-weight:800; letter-spacing:.04em; }
+.telemetry-strip .stop-request { position:absolute; left:50%; transform:translateX(-50%); }
+.stop-request svg { width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
+.stop-request.active { color:#fff2a6; background:#765b00; border:1px solid #ffe15c; border-radius:5px; padding:4px 7px; text-shadow:0 0 7px rgba(255,225,92,.85); box-shadow:0 0 10px rgba(255,225,92,.55); }
 .strip-fuel { flex:1 1 auto; min-width:0; display:flex; align-items:center; justify-content:flex-end; gap:10px; font-size:14px; font-variant-numeric:tabular-nums; white-space:nowrap; }
 .strip-fuel .fuel-caption { color:#aab8c2; font-size:10px; text-transform:uppercase; letter-spacing:.08em; }
 .strip-fuel strong { font-size:16px; }
@@ -67,63 +71,101 @@ body { min-height: 100%; min-height: 100vh; padding: 14px; display: flex; flex-d
 .pad { display: grid; grid-template-columns: repeat(3, minmax(60px, 1fr)); gap: 8px; max-width: 360px; margin: 12px auto; }
 .pad-button { font-size: 20px; }
 .terminal-message { min-height: 22px; color: #ffc857; text-align: center; }
+.vehicle-status { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:5px; margin-top:10px; }
+.vehicle-indicator { min-width:0; min-height:70px; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:3px; padding:5px 2px; border:1px solid #536570; border-radius:8px; color:#c0cbd1; text-align:center; background:rgba(255,255,255,.035); }
+.vehicle-indicator svg { width:27px; height:27px; flex:0 0 auto; fill:none; stroke:currentColor; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
+.vehicle-indicator span { font-size:9px; line-height:1.1; overflow-wrap:anywhere; }
+.vehicle-indicator .indicator-state { font-size:8px; font-weight:bold; letter-spacing:.08em; }
+.vehicle-indicator.active { color:#7dff9e; border-color:#57b879; background:rgba(57,155,86,.2); }
+.vehicle-indicator.blue.active { color:#68aaff; border-color:#548bc5; background:rgba(48,105,170,.2); }
+.vehicle-indicator.red.active { color:#ff7770; border-color:#b75b55; background:rgba(170,55,50,.2); }
+.vehicle-indicator.amber.active { color:#ffd166; border-color:#ba9647; background:rgba(165,126,39,.2); }
+.vehicle-indicator.warning.active { color:#ff6b6b; border-color:#874747; background:rgba(135,50,50,.18); }
+.speed-limit-card { flex: 0 0 auto; width: 100%; max-width: none; display: flex; align-items: center; justify-content: center; gap: 18px; background: #1b2933; color: #f4f1e8; border: 1px solid #2a3b47; }
+.speed-limit-sign { width: 104px; height: 104px; flex: 0 0 104px; border: 9px solid #d5232a; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; color: #15191c; font-size: 46px; line-height: 1; font-weight: 800; font-variant-numeric: tabular-nums; }
+.speed-limit-info { text-align: left; }
+.speed-limit-info .label { color: #8da0ad; }
+.speed-limit-info .unit { color: #aab8c2; text-align: left; font-size: 20px; font-weight: bold; margin-top: 4px; }
 .ticket-panel { flex: 0 0 auto; width:100%; }
 .ticket-actions { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); }
 .ticket-actions .terminal-button { min-width: 0; padding: 8px 4px; }
 @media (orientation: portrait) { body { padding: 10px; } .cockpit-grid { display: flex; flex-direction: column; } #controlPanel, #dashboard { width: 100%; } .side { flex-direction: row; flex-wrap: wrap; } .side > .card { flex: 1 1 220px; } }
-@media (orientation: landscape) and (max-height: 620px) { body { padding: 8px; } .top { min-height: 34px; margin-bottom: 7px; } .telemetry-strip { min-height: 34px; margin-bottom: 8px; padding: 2px 12px; } .telemetry-strip .arrow { font-size: 21px; } .strip-speed strong { font-size: 22px; } .cockpit-grid, .layout { gap: 8px; } .card { padding: 11px; border-radius: 9px; } .side { gap: 8px; } .tile { min-height: 52px; padding: 8px; } .tile .value { margin-top: 3px; font-size: 16px; } .fuel-value { font-size: 20px; margin: 5px 0; } .bar { height: 9px; } .route { font-size: 14px; } .route strong { font-size: 19px; margin: 2px 0 5px; } .hint { padding: 5px 0 1px; } .terminal-screen { min-height: 45px; padding: 7px; margin: 7px 0; } .terminal-screen strong { font-size: 18px; margin-top: 2px; } .terminal-actions, .ticket-actions { gap: 5px; margin: 6px 0; } .terminal-button, .pad-button { padding: 8px; min-height: 38px; font-size: 14px; } .pad { gap: 5px; margin: 7px auto; } .pad-button { font-size: 18px; } .terminal-message { min-height: 15px; font-size: 11px; } }
-.theme-ibis { background: #171810; color: #e5d5a2; font-family: "Courier New", monospace; }
-html.theme-ibis { background: #171810; }
-.theme-ibis .card { background: #202116; border: 1px solid #65603d; border-radius: 3px; }
-.theme-ibis .brand, .theme-ibis .label, .theme-ibis .unit, .theme-ibis .hint { color: #aaa077; }
-.theme-ibis .speed, .theme-ibis .gear, .theme-ibis .route strong { color: #ffd16b; }
-.theme-ibis .arrow.on, .theme-ibis .door.open, .theme-ibis .status.online { color: #a9df79; text-shadow: none; }
-.theme-ibis .door { color: #ffd16b; }
-.theme-ibis .door.open { color: #a9df79; }
-.theme-ibis .tile { background: #28291b; border-radius: 2px; }
-.theme-ibis .bar { background: #393925; border-radius: 0; }
-.theme-ibis .fill { background: #a9df79; }
-.theme-ibis .theme-button { background: #202116; color: #e5d5a2; border-color: #65603d; border-radius: 2px; font-family: "Courier New", monospace; }
-.theme-ibis .theme-button.selected { background: #ffd16b; color: #171810; }
-.theme-ibis .fullscreen-feedback { color: #ffd16b; }
-.theme-ibis .telemetry-strip { background:#202116; border-color:#65603d; border-radius:2px; }
-.theme-ibis .strip-speed span, .theme-ibis .strip-fuel .fuel-caption { color:#aaa077; }
-.theme-ibis .strip-fuel { color:#ffd16b; }
-.theme-ibis .strip-speed strong { color:#baff79; text-shadow:none; }
-.theme-ibis .terminal-screen { background: #171810; color: #ffd16b; border-color: #65603d; }
-.theme-ibis .terminal-button, .theme-ibis .pad-button { background: #28291b; color: #e5d5a2; border-color: #65603d; border-radius: 2px; }
-.theme-ibis .terminal-button:active, .theme-ibis .pad-button:active, .theme-ibis .terminal-button.pressed, .theme-ibis .pad-button.pressed { background:#686345; color:#fff4c7; }
-.theme-atron { background: #b9c2c3; color: #17242b; }
-html.theme-atron { background: #b9c2c3; }
-.theme-atron .top { background: #1e333d; border-radius: 9px; padding: 7px 12px; }
-.theme-atron .brand { color: #e8f0ee; }
-.theme-atron .status.online { color: #8de2a5; }
-.theme-atron .status { color: #ffd16b; }
-.theme-atron .card { background: #e8edeb; border: 1px solid #9ba9a7; border-radius: 9px; box-shadow: 0 2px 5px rgba(22,43,50,.13); color: #17242b; }
-.theme-atron .label, .theme-atron .unit, .theme-atron .hint, .theme-atron .brand { color: #60747a; }
-.theme-atron .top .brand { color: #e8f0ee; }
-.theme-atron .speed { color: #172e38; }
-.theme-atron .gear, .theme-atron .route strong { color: #176b52; }
-.theme-atron .arrow.on { color: #128454; text-shadow: none; }
+@media (orientation: landscape) and (max-height: 620px) { body { padding: 8px; } .top { min-height: 34px; margin-bottom: 7px; } .telemetry-strip { min-height: 34px; margin-bottom: 8px; padding: 2px 12px; } .telemetry-strip .arrow { font-size: 21px; } .strip-speed strong { font-size: 22px; } .cockpit-grid, .layout { gap: 8px; } .card { padding: 11px; border-radius: 9px; } .side { gap: 8px; } .tile { min-height: 52px; padding: 8px; } .tile .value { margin-top: 3px; font-size: 16px; } .fuel-value { font-size: 20px; margin: 5px 0; } .bar { height: 9px; } .route { font-size: 14px; } .route strong { font-size: 19px; margin: 2px 0 5px; } .hint { padding: 5px 0 1px; } .terminal-screen { min-height: 45px; padding: 7px; margin: 7px 0; } .terminal-screen strong { font-size: 18px; margin-top: 2px; } .terminal-actions, .ticket-actions { gap: 5px; margin: 6px 0; } .terminal-button, .pad-button { padding: 8px; min-height: 38px; font-size: 14px; } .pad { gap: 5px; margin: 7px auto; } .pad-button { font-size: 18px; } .terminal-message { min-height: 15px; font-size: 11px; } .vehicle-status { gap:4px; margin-top:6px; } .vehicle-indicator { min-height:52px; gap:2px; padding:3px 1px; } .vehicle-indicator svg { width:20px; height:20px; } .vehicle-indicator span { font-size:8px; } .speed-limit-card { gap: 12px; } .speed-limit-sign { width: 78px; height: 78px; flex-basis: 78px; border-width: 7px; font-size: 34px; } .speed-limit-info .label { font-size: 10px; } .speed-limit-info .unit { font-size: 16px; margin-top: 1px; } }
+.theme-ibis { background: #d9dce6; color: #20232b; font-family: "Courier New", monospace; }
+html.theme-ibis { background: #d9dce6; }
+.theme-ibis .top { background:#e8d77d; border:1px solid #b5a85f; border-radius:2px; padding:7px 12px; }
+.theme-ibis .top .brand { color:#292a2d; }
+.theme-ibis .status { color:#6c5912; }
+.theme-ibis .status.online { color:#176d3b; }
+.theme-ibis .card { background: #e9ebf1; border: 1px solid #a1a6b4; border-radius: 2px; }
+.theme-ibis .brand, .theme-ibis .label, .theme-ibis .unit, .theme-ibis .hint { color: #535761; }
+.theme-ibis .speed, .theme-ibis .gear, .theme-ibis .route strong { color: #202630; }
+.theme-ibis .arrow.on, .theme-ibis .door.open, .theme-ibis .status.online { color: #24834e; text-shadow: none; }
+.theme-ibis .door { color: #98730b; }
+.theme-ibis .door.open { color: #24834e; }
+.theme-ibis .tile { background: #d5d9e5; border-radius: 2px; }
+.theme-ibis .bar { background: #b7bdca; border-radius: 0; }
+.theme-ibis .fill { background: #39a75c; }
+.theme-ibis .theme-button { background: #ececf1; color: #272b32; border-color: #9298a5; border-radius: 2px; font-family: "Courier New", monospace; }
+.theme-ibis .theme-button.selected { background: #e8d354; border-color:#b6a72b; color: #20232b; }
+.theme-ibis .fullscreen-feedback { color: #675510; }
+.theme-ibis .telemetry-strip { background:#e8d77d; border-color:#b5a85f; border-radius:2px; color:#25272c; }
+.theme-ibis .strip-speed span, .theme-ibis .strip-fuel .fuel-caption { color:#554f38; }
+.theme-ibis .strip-fuel { color:#25272c; }
+.theme-ibis .stop-request { color:#555a62; }
+.theme-ibis .stop-request.active { color:#20232b; background:#f4dc52; border-color:#bd9f16; text-shadow:none; box-shadow:0 0 7px rgba(228,197,51,.6); }
+.theme-ibis .strip-speed strong { color:#202630; text-shadow:none; }
+.theme-ibis .terminal-screen { background: #e2e5ef; color: #222630; border-color: #9ba2b2; }
+.theme-ibis .terminal-button, .theme-ibis .pad-button { background: #d2d6e5; color: #222630; border-color: #9298aa; border-radius: 3px; }
+.theme-ibis .pad-button:nth-child(10) { background:#ed5342; color:#fff; border-color:#b8372b; }
+.theme-ibis .pad-button:nth-child(12) { background:#49bb62; color:#102c19; border-color:#238740; }
+.theme-ibis .terminal-button:active, .theme-ibis .pad-button:active, .theme-ibis .terminal-button.pressed, .theme-ibis .pad-button.pressed { background:#aeb8d0; color:#20232b; }
+.theme-ibis .pad-button:nth-child(10):active, .theme-ibis .pad-button:nth-child(10).pressed { background:#c94335; color:#fff; }
+.theme-ibis .pad-button:nth-child(12):active, .theme-ibis .pad-button:nth-child(12).pressed { background:#349d4d; color:#fff; }
+.theme-ibis .vehicle-indicator.active { color:#21834c; border-color:#6caa7f; background:#d9e9dc; }
+.theme-ibis .vehicle-indicator.blue.active { color:#1769b0; border-color:#6e9dc2; background:#d7e4ed; }
+.theme-ibis .vehicle-indicator.red.active { color:#b62424; border-color:#c18484; background:#f1dddd; }
+.theme-ibis .vehicle-indicator.amber.active { color:#8a6100; border-color:#b7a36e; background:#f5edc9; }
+.theme-ibis .vehicle-indicator.warning.active { color:#c83232; border-color:#c18484; }
+.theme-atron { background: #dce5e9; color: #172a33; }
+html.theme-atron { background: #dce5e9; }
+.theme-atron .top { background: #1594b4; border-radius: 2px; padding: 7px 12px; }
+.theme-atron .brand { color: #eaf8fb; }
+.theme-atron .status.online { color: #d5ffd8; }
+.theme-atron .status { color: #fff3b0; }
+.theme-atron .card { background: #edf2f4; border: 1px solid #9dafb6; border-radius: 3px; box-shadow: 0 1px 3px rgba(22,43,50,.12); color: #172a33; }
+.theme-atron .label, .theme-atron .unit, .theme-atron .brand { color: #536d77; }
+.theme-atron .hint { color:#243c45; }
+.theme-atron .top .brand { color: #f2fbfd; }
+.theme-atron .speed { color: #123d4b; }
+.theme-atron .gear, .theme-atron .route strong { color: #08718b; }
+.theme-atron .arrow.on { color: #087d55; text-shadow: none; }
 .theme-atron .door.open { color: #c83232; text-shadow: none; }
-.theme-atron .tile { background: #d7e0dd; border-radius: 6px; }
-.theme-atron .bar { background: #bdcbc6; }
+.theme-atron .tile { background: #dce7eb; border-radius: 2px; }
+.theme-atron .bar { background: #c1d0d5; }
 .theme-atron .fill { background: #168256; }
-.theme-atron .theme-button { background: #e8edeb; color: #31434a; border-color: #71868a; }
-.theme-atron .theme-button.selected { background: #55bd88; border-color: #32865e; color: #10271e; }
-.theme-atron .fullscreen-feedback { color: #176b52; }
-.theme-atron .telemetry-strip { background:#1e333d; border-color:#71868a; }
-.theme-atron .strip-speed span, .theme-atron .strip-fuel .fuel-caption { color:#d2dfdc; }
-.theme-atron .strip-fuel { color:#e8f0ee; }
-.theme-atron .strip-speed strong { color:#8dff9b; text-shadow:none; }
-.theme-atron .terminal-screen { background: #1e333d; color: #8de2a5; }
-.theme-atron .terminal-button, .theme-atron .pad-button { background: #d7e0dd; color: #17242b; border-color: #71868a; }
-.theme-atron .terminal-button:active, .theme-atron .pad-button:active, .theme-atron .terminal-button.pressed, .theme-atron .pad-button.pressed { background:#899895; color:#fff; }
+.theme-atron .theme-button { background: #edf2f4; color: #263f49; border-color: #6f929e; border-radius: 2px; }
+.theme-atron .theme-button.selected { background: #1594b4; border-color: #087d9c; color: #fff; }
+.theme-atron .fullscreen-feedback { color: #08718b; }
+.theme-atron .telemetry-strip { background:#1594b4; border-color:#087d9c; border-radius:2px; color:#f5fbfc; }
+.theme-atron .strip-speed span, .theme-atron .strip-fuel .fuel-caption { color:#e0f4f7; }
+.theme-atron .strip-fuel { color:#fff; }
+.theme-atron .stop-request { color:#e7f5f7; }
+.theme-atron .stop-request.active { color:#172a33; background:#ffe365; border-color:#fff2a6; text-shadow:none; box-shadow:0 0 8px rgba(255,227,101,.7); }
+.theme-atron .strip-speed strong { color:#fff; text-shadow:0 1px 2px rgba(0,52,67,.35); }
+.theme-atron .terminal-screen { background: #e3ecef; color: #173943; border-color:#6f929e; }
+.theme-atron .terminal-button, .theme-atron .pad-button { background: #dce7eb; color: #172a33; border-color: #7d9ca5; border-radius:3px; }
+.theme-atron .terminal-button:active, .theme-atron .pad-button:active, .theme-atron .terminal-button.pressed, .theme-atron .pad-button.pressed { background:#1594b4; color:#fff; }
+.theme-atron .vehicle-indicator.active { color:#087d55; border-color:#72a790; background:#dce7eb; }
+.theme-atron .vehicle-indicator.blue.active { color:#1769b0; border-color:#6e9dc2; background:#d7e4ed; }
+.theme-atron .vehicle-indicator.red.active { color:#b62424; border-color:#c18484; background:#f1dddd; }
+.theme-atron .vehicle-indicator.amber.active { color:#8a6100; border-color:#b7a36e; background:#fff2bf; }
+.theme-atron .vehicle-indicator.warning.active { color:#c83232; border-color:#c18484; }
 </style>
 </head>
 <body>
 <header class="top"><div class="brand">OpenOMSI · Bordrechner</div><div class="top-controls"><div id="status" class="status">Verbinde …</div><button id="ibisButton" class="theme-button" type="button" onclick="setTheme('ibis')">IBIS</button><button id="atronButton" class="theme-button" type="button" onclick="setTheme('atron')">ATRON</button><button id="fullscreenButton" class="theme-button" type="button" onclick="toggleFullscreen()">Vollbild</button><span id="fullscreenFeedback" class="fullscreen-feedback" aria-live="polite"></span></div></header>
-<div class="telemetry-strip"><span id="left" class="arrow">◀</span><div class="strip-speed"><strong id="speed">—</strong><span>km/h</span></div><span id="right" class="arrow">▶</span><div class="strip-fuel"><span class="fuel-caption">Tank</span><strong id="fuel">— L</strong><span id="percent">— %</span><div class="bar"><div id="fuelbar" class="fill"></div></div></div></div>
+<div class="telemetry-strip"><span id="left" class="arrow">◀</span><div class="strip-speed"><strong id="speed">—</strong><span>km/h</span></div><span id="right" class="arrow">▶</span><div id="stopRequest" class="stop-request" aria-label="Haltestellenwunsch" title="Haltestellenwunsch"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><span>HALTEWUNSCH</span></div><div class="strip-fuel"><span class="fuel-caption">Tank</span><strong id="fuel">— L</strong><span id="percent">— %</span><div class="bar"><div id="fuelbar" class="fill"></div></div></div></div>
 <div class="cockpit-grid">
 <main id="dashboard" class="layout">
   <div class="side">
@@ -138,6 +180,10 @@ html.theme-atron { background: #b9c2c3; }
         <div id="doorMiddle" class="tile door"><span class="label">Mitte</span><span class="value">ZU</span></div>
         <div id="doorRear" class="tile door"><span class="label">Hinten</span><span class="value">ZU</span></div>
       </div>
+    </section>
+    <section class="card speed-limit-card">
+      <div class="speed-limit-sign" id="speedLimit">—</div>
+      <div class="speed-limit-info"><div class="label">Höchstgeschwindigkeit</div><div class="unit">km/h</div></div>
     </section>
     <section id="ticketsCard" class="card ticket-panel hidden">
       <div class="label">Fahrkartenverkauf</div>
@@ -161,6 +207,23 @@ html.theme-atron { background: #b9c2c3; }
       <div class="terminal-actions">
         <button class="terminal-button" type="button" onclick="selectMode('line')">Linie</button>
         <button class="terminal-button" type="button" onclick="selectMode('umlauf')">Umlauf / Route</button>
+      </div>
+    </div>
+    <div class="vehicle-status" aria-label="Fahrzeugstatus">
+      <div id="statusHeadlights" class="vehicle-indicator" title="Scheinwerfer" aria-label="Scheinwerfer">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7.5h4.5a4.5 4.5 0 0 1 0 9H3z"/><path d="m13 8 7 2M13 11 21 13M13 14l7 2"/></svg><span>Scheinwerfer</span><small class="indicator-state">AUS</small>
+      </div>
+      <div id="statusHighBeam" class="vehicle-indicator" title="Fernlicht" aria-label="Fernlicht">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7.5h4.5a4.5 4.5 0 0 1 0 9H3z"/><path d="M13 8h8M13 11h8M13 14h8"/></svg><span>Fernlicht</span><small class="indicator-state">AUS</small>
+      </div>
+      <div id="statusParkingBrake" class="vehicle-indicator" title="Handbremse" aria-label="Handbremse">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M10 17V7h3a3 3 0 0 1 0 6h-3"/></svg><span>Handbremse</span><small class="indicator-state">AUS</small>
+      </div>
+      <div id="statusStopBrake" class="vehicle-indicator" title="Haltestellenbremse" aria-label="Haltestellenbremse">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 18V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v11z"/><path d="M8 5v13M16 5v13M3 18h18M8 21h.01M16 21h.01"/><path d="M10 9h4v5h-4z"/></svg><span>Haltestellenbremse</span><small class="indicator-state">AUS</small>
+      </div>
+      <div id="statusHazards" class="vehicle-indicator warning" title="Warnblinker" aria-label="Warnblinker">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 22 20H2z"/><path d="M12 9v5M12 17h.01"/></svg><span>Warnblinker</span><small class="indicator-state">AUS</small>
       </div>
     </div>
     <div id="commandMessage" class="terminal-message" aria-live="polite"></div>
@@ -194,6 +257,13 @@ html.theme-atron { background: #b9c2c3; }
     el.className = open ? "tile door open" : "tile door";
     el.getElementsByTagName("span")[1].textContent = open ? "OFFEN" : "ZU";
   }
+  function setVehicleIndicator(id, active) {
+    var el = byId(id);
+    var warning = id === "statusHazards";
+    var color = id === "statusHighBeam" ? " blue" : (id === "statusParkingBrake" ? " red" : ((id === "statusStopBrake" || warning) ? " amber" : ""));
+    el.className = "vehicle-indicator" + color + (warning ? " warning" : "") + (active ? " active" : "");
+    el.getElementsByClassName("indicator-state")[0].textContent = active ? "EIN" : "AUS";
+  }
   function update(snapshot) {
     var d = snapshot && snapshot.data ? snapshot.data : {};
     var connected = snapshot && snapshot.connected;
@@ -201,8 +271,11 @@ html.theme-atron { background: #b9c2c3; }
     status.textContent = connected ? (d.paused ? "Spiel pausiert" : "Verbunden") : "Warte auf OpenOMSI …";
     status.className = connected ? "status online" : "status";
     setText("speed", connected ? Math.round(Math.abs(Number(d.speedKmh) || 0)) : "—");
+    var speedLimit = Number(d.speedLimitKmh);
+    setText("speedLimit", connected && isFinite(speedLimit) && speedLimit > 0 ? Math.round(speedLimit) : "—");
     byId("left").className = d.turnLeft ? "arrow on" : "arrow";
     byId("right").className = d.turnRight ? "arrow on" : "arrow";
+    byId("stopRequest").className = connected && d.stopRequested ? "stop-request active" : "stop-request";
     var liters = Number(d.fuelLiters) || 0;
     var percent = Math.max(0, Math.min(100, Number(d.fuelPercent) || 0));
     setText("fuel", connected ? liters.toFixed(0) + " L" : "— L");
@@ -211,13 +284,18 @@ html.theme-atron { background: #b9c2c3; }
     setDoor("doorFront", connected && d.frontDoorOpen);
     setDoor("doorMiddle", connected && d.middleDoorOpen);
     setDoor("doorRear", connected && d.rearDoorOpen);
+    setVehicleIndicator("statusHeadlights", connected && d.lowBeam);
+    setVehicleIndicator("statusHighBeam", connected && d.highBeam);
+    setVehicleIndicator("statusParkingBrake", connected && d.parkingBrake);
+    setVehicleIndicator("statusStopBrake", connected && d.stopBrake);
+    setVehicleIndicator("statusHazards", connected && d.hazards);
     setText("destination", connected ? (d.destination || "Kein Ziel") : "—");
     setText("line", "Linie " + (connected && d.line ? d.line : "—"));
     setText("nextStop", "Nächster Halt: " + (connected && d.nextStop ? d.nextStop : "—"));
     var profile = connected ? (d.controlProfile || "none") : "none";
-    var labels = {almex:"Almex erkannt", atron:"ATRON-Terminal erkannt", afr4:"AFR4-Terminal erkannt", ibox:"IBox erkannt", "ibox-ibis":"IBox und IBIS erkannt", ibis:"IBIS erkannt", ticketprinter:"Standard-Ticketdrucker erkannt", "ibis-ticketprinter":"IBIS und Standard-Ticketdrucker erkannt", none:"Für diesen Bus noch kein Bedienprofil"};
+    var labels = {almex:"Almex erkannt", atron:"ATRON-Terminal erkannt", afr4:"AFR4-Terminal erkannt", ibox:"IBox erkannt", "ibox-ibis":"IBox und IBIS erkannt", ibis:"IBIS erkannt", "mvg-copilot":"MVG-CoPilot erkannt", ticketprinter:"Standard-Ticketdrucker erkannt", "ibis-ticketprinter":"IBIS und Standard-Ticketdrucker erkannt", none:"Für diesen Bus noch kein Bedienprofil"};
     setText("controlProfile", labels[profile] || "Busprofil: " + profile);
-    byId("ticketsCard").className = profile === "almex" || profile === "atron" || profile === "afr4" || profile === "ibox" || profile === "ibox-ibis" || profile === "ticketprinter" || profile === "ibis-ticketprinter" ? "card terminal" : "card terminal hidden";
+    byId("ticketsCard").className = profile === "almex" || profile === "atron" || profile === "afr4" || profile === "ibox" || profile === "ibox-ibis" || profile === "mvg-copilot" || profile === "ticketprinter" || profile === "ibis-ticketprinter" ? "card terminal" : "card terminal hidden";
     byId("routeControls").className = profile === "ticketprinter" ? "hidden" : "";
     rebuildTicketButtons(profile);
     Array.prototype.forEach.call(document.querySelectorAll("#controlPanel button, #ticketsCard button"), function (button) { button.disabled = !connected || profile === "none"; });
@@ -258,7 +336,7 @@ html.theme-atron { background: #b9c2c3; }
     var container = byId("ticketActions");
     while (container.firstChild) container.removeChild(container.firstChild);
     var count = profile === "almex" ? 8 : profile === "atron" ? 10 : profile === "ibox" || profile === "ibox-ibis" ? 7 : 5;
-    if (profile !== "almex" && profile !== "atron" && profile !== "afr4" && profile !== "ibox" && profile !== "ibox-ibis" && profile !== "ticketprinter" && profile !== "ibis-ticketprinter") count = 0;
+    if (profile !== "almex" && profile !== "atron" && profile !== "afr4" && profile !== "ibox" && profile !== "ibox-ibis" && profile !== "mvg-copilot" && profile !== "ticketprinter" && profile !== "ibis-ticketprinter") count = 0;
     for (var i = 1; i <= count; i++) {
       var button = document.createElement("button");
       button.className = "terminal-button";

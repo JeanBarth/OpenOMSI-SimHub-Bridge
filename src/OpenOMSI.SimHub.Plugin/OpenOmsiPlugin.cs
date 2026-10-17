@@ -197,6 +197,7 @@ namespace OpenOMSI.SimHub
             this.AttachDelegate("OpenOMSI.ControlProfile", () => Current.ControlProfile ?? "none");
             this.AttachDelegate("OpenOMSI.Map", () => Current.Map ?? "");
             this.AttachDelegate("OpenOMSI.SpeedKmh", () => Current.SpeedKmh);
+            this.AttachDelegate("OpenOMSI.SpeedLimitKmh", () => Current.SpeedLimitKmh);
             this.AttachDelegate("OpenOMSI.Throttle", () => Current.Throttle);
             this.AttachDelegate("OpenOMSI.Brake", () => Current.Brake);
             this.AttachDelegate("OpenOMSI.SteeringRad", () => Current.SteeringRad);
@@ -212,6 +213,7 @@ namespace OpenOMSI.SimHub
             this.AttachDelegate("OpenOMSI.GearSelector", () => Current.GearSelector ?? "");
             this.AttachDelegate("OpenOMSI.Retarder", () => Current.Retarder);
             this.AttachDelegate("OpenOMSI.ParkingBrake", () => Current.ParkingBrake);
+            this.AttachDelegate("OpenOMSI.StopBrake", () => Current.StopBrake);
             this.AttachDelegate("OpenOMSI.AbsActive", () => Current.AbsActive);
             this.AttachDelegate("OpenOMSI.AirPressure1Bar", () => Current.AirPressure1Bar);
             this.AttachDelegate("OpenOMSI.AirPressure2Bar", () => Current.AirPressure2Bar);
@@ -233,6 +235,7 @@ namespace OpenOMSI.SimHub
             this.AttachDelegate("OpenOMSI.PositionLights", () => Current.PositionLights);
             this.AttachDelegate("OpenOMSI.LowBeam", () => Current.LowBeam);
             this.AttachDelegate("OpenOMSI.HighBeam", () => Current.HighBeam);
+            this.AttachDelegate("OpenOMSI.HeadlightsLevel", () => Current.HeadlightsLevel);
             this.AttachDelegate("OpenOMSI.ReverseLight", () => Current.ReverseLight);
             this.AttachDelegate("OpenOMSI.Wipers", () => Current.Wipers);
             this.AttachDelegate("OpenOMSI.WiperPosition", () => Current.WiperPosition);

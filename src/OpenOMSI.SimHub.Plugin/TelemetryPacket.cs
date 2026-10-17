@@ -14,6 +14,7 @@ namespace OpenOMSI.SimHub
         public string ControlProfile { get; set; }
         public string Map { get; set; }
         public double SpeedKmh { get; set; }
+        public double SpeedLimitKmh { get; set; }
         public double Throttle { get; set; }
         public double Brake { get; set; }
         public double SteeringRad { get; set; }
@@ -29,6 +30,7 @@ namespace OpenOMSI.SimHub
         public string GearSelector { get; set; }
         public double Retarder { get; set; }
         public bool ParkingBrake { get; set; }
+        public bool StopBrake { get; set; }
         public bool AbsActive { get; set; }
         public double AirPressure1Bar { get; set; }
         public double AirPressure2Bar { get; set; }
@@ -50,6 +52,7 @@ namespace OpenOMSI.SimHub
         public bool PositionLights { get; set; }
         public bool LowBeam { get; set; }
         public bool HighBeam { get; set; }
+        public double HeadlightsLevel { get; set; }
         public bool ReverseLight { get; set; }
         public bool Wipers { get; set; }
         public double WiperPosition { get; set; }

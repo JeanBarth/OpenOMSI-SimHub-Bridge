@@ -1,0 +1,11 @@
+OpenOMSI SimHub Bridge 2.14.35 update
+
+Restyles the IBIS tablet theme after the supplied reference: light blue-gray display, warm yellow status bars, dark text, pale keypad keys, and green/red function controls. The Atron theme is unchanged.
+
+Install:
+1. Close openOMSI and SimHub.
+2. Replace OpenOMSI_SimHub_Bridge.lua in the openOMSI plugins folder.
+3. Replace OpenOMSI.SimHub.Plugin.dll in the SimHub installation folder.
+4. Start SimHub and openOMSI again.
+
+Intended for openOMSI 0.3.0 and newer.

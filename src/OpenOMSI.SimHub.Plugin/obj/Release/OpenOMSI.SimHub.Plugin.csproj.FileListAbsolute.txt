@@ -1,0 +1,6 @@
+C:\Users\freer\Documents\Codex\2026-10-07\wir-hatten-ja-gerade-das-projekt\work\repo\src\OpenOMSI.SimHub.Plugin\bin\Release\OpenOMSI.SimHub.Plugin.dll
+C:\Users\freer\Documents\Codex\2026-10-07\wir-hatten-ja-gerade-das-projekt\work\repo\src\OpenOMSI.SimHub.Plugin\bin\Release\OpenOMSI.SimHub.Plugin.pdb
+C:\Users\freer\Documents\Codex\2026-10-07\wir-hatten-ja-gerade-das-projekt\work\repo\src\OpenOMSI.SimHub.Plugin\obj\Release\OpenOMSI.SimHub.Plugin.dll
+C:\Users\freer\Documents\Codex\2026-10-07\wir-hatten-ja-gerade-das-projekt\work\repo\src\OpenOMSI.SimHub.Plugin\obj\Release\OpenOMSI.SimHub.Plugin.pdb
+C:\Users\freer\Documents\Codex\2026-10-07\wir-hatten-ja-gerade-das-projekt\work\repo\src\OpenOMSI.SimHub.Plugin\obj\Release\OpenOMSI.SimHub.Plugin.csproj.AssemblyReference.cache
+C:\Users\freer\Documents\Codex\2026-10-07\wir-hatten-ja-gerade-das-projekt\work\repo\src\OpenOMSI.SimHub.Plugin\obj\Release\OpenOMSI.SimHub.Plugin.csproj.CoreCompileInputs.cache

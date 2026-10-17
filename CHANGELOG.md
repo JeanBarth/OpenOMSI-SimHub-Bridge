@@ -1,3 +1,49 @@
+## 2.14.35
+
+- Restyle the IBIS dashboard after the supplied terminal reference, with a light blue-gray display, warm status bars, dark text, and colored keypad/status controls.
+
+## 2.14.34
+
+- Restyle the Atron dashboard after the supplied reference: pale blue-gray panels, cyan header and telemetry bar, dark readable text, and Atron-like colored status controls.
+
+## 2.14.33
+
+- Center the stop-request indicator in the telemetry strip without moving it to another row.
+- Match its colors to the BVG Atron dark display: muted white when idle and bright Atron green on a dark field when active.
+
+## 2.14.32
+
+- Move the stop-request indicator directly after the right turn signal.
+- Make an active stop request stand out with a bold, glowing yellow badge in both tablet themes.
+
+## 2.14.31
+
+- Add a live stop-request bell indicator beside the right turn signal in the telemetry strip.
+
+## 2.14.30
+
+- Read the low-beam dashboard indicator from the telemetry packet's actual `lowBeam` field.
+
+## 2.14.29
+
+- Keep bus-script light signals active when the normalized openOMSI API reports off, while combining both sources.
+- Use the familiar dipped-beam and high-beam pictograms with slanted and straight light rays.
+
+## 2.14.28
+
+- Read headlight and high-beam states using openOMSI 0.3.0's documented bus-variable mapping, with a fallback when the API is unavailable.
+- Improve cockpit status contrast with clearer icons, color-coded active states and explicit EIN/AUS labels.
+- Set the ATRON hint text to dark for its light background; keep the IBIS hint yellow.
+
+## 2.14.27
+
+- Use openOMSI's standard bus API for door leaf positions, headlight state, handbrake, stop brake and hazard lights.
+- Add live status icons for headlights, high beams, parking brake, stop brake and hazards below the line and route controls.
+
+## 2.14.26
+
+- Read the current road speed limit from `omsi.map.speed_limit()` (openOMSI 0.2.22+) and forward it to the tablet and SimHub property channel.
+
 ## 2.14.21
 
 - Add vehicle detection and tablet key mappings for AFR4 and IBox terminals, including the IBox-specific zero, delete and enter keys.
@@ -147,4 +193,18 @@
 
 - Replace the F11 frame marker with numpad plus to avoid triggering openOMSI's view change while sending tablet input.
 - Keep Almex OK mapped to the terminal's NB/enter button; preserve the profile-specific confirmation keys for other terminals.
+
+## 2.14.23
+
+- Add a large road speed-limit sign below the tablet terminal keypad; display the openOMSI navigator limit when exposed by its Lua info table.
+
+## 2.14.24
+
+- Move the road speed-limit sign below the door status on the right side of the tablet layout.
+- Hold the Almex OK button briefly so its script can process the confirmation press.
+
+## 2.14.25
+
+- Detect and support the Munich MAN Lions City MVG CoPilot for line/course/route entry and keypad confirmation.
+- Keep line and route controls available for the CoPilot profile and match the speed-limit card to the dark cockpit theme.
 

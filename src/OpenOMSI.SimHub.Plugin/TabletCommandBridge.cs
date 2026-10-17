@@ -131,15 +131,16 @@ namespace OpenOMSI.SimHub
             bool hasAlmex = normalizedProfile == "almex";
             bool hasAtron = normalizedProfile == "atron";
             bool hasAfr4 = normalizedProfile == "afr4";
+            bool hasMvgCopilot = normalizedProfile == "mvg-copilot";
             bool hasIbox = normalizedProfile == "ibox" || normalizedProfile == "ibox-ibis";
             bool hasIbis = normalizedProfile == "ibis" || normalizedProfile == "ibis-ticketprinter";
             if (normalizedProfile == "ibox-ibis") hasIbis = true;
-            bool hasTicketPrinter = hasAlmex || hasAtron || hasAfr4 || hasIbox || normalizedProfile == "ticketprinter" || normalizedProfile == "ibis-ticketprinter";
-            if ((action == "line" || action == "umlauf" || action == "digit") && !hasAlmex && !hasIbis && !hasAtron && !hasAfr4 && !hasIbox)
+            bool hasTicketPrinter = hasAlmex || hasAtron || hasAfr4 || hasIbox || hasMvgCopilot || normalizedProfile == "ticketprinter" || normalizedProfile == "ibis-ticketprinter";
+            if ((action == "line" || action == "umlauf" || action == "digit") && !hasAlmex && !hasIbis && !hasAtron && !hasAfr4 && !hasIbox && !hasMvgCopilot)
                 return new TabletCommandResult(false, "Dieses Fahrzeugprofil unterstützt keine Routeneingabe.");
             if ((action == "ticket" || action == "sell") && !hasTicketPrinter)
                 return new TabletCommandResult(false, "Dieses Fahrzeugprofil unterstützt keinen Ticketverkauf.");
-            if ((action == "confirm" || action == "cancel") && !hasAlmex && !hasIbis && !hasAtron && !hasAfr4 && !hasIbox && normalizedProfile != "ticketprinter")
+            if ((action == "confirm" || action == "cancel") && !hasAlmex && !hasIbis && !hasAtron && !hasAfr4 && !hasIbox && !hasMvgCopilot && normalizedProfile != "ticketprinter")
                 return new TabletCommandResult(false, "Dieser Befehl wird von diesem Fahrzeugprofil nicht unterstützt.");
 
             lock (SendLock)

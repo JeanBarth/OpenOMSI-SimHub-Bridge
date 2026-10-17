@@ -15,6 +15,8 @@ This project is not affiliated with openOMSI, SimHub, OMSI or Aerosoft.
 - Automatic, electric and manual transmission handling
 - D/N/R for automatic and electric buses; numbered gears for manual buses
 - Turn indicators and hazard lights
+- Tablet speed-limit sign and `OpenOMSI.SpeedLimitKmh` property via `omsi.map.speed_limit()` (openOMSI 0.2.22+)
+- Tablet status icons for headlights, high beam, handbrake, stop brake and hazard lights
 - SimHub properties under the `OpenOMSI.*` namespace
 - RGB matrix helper for the cloned `OpenOMSI` SimHub profile
 - Speed-dependent low-level feedback for electric buses
