@@ -1,0 +1,9 @@
+bin/
+obj/
+*.user
+*.suo
+*.pdb
+*.log
+*.tmp
+ArduinoRGBMatrixSettings*.json
+*.OpenOMSI-Backup-*
